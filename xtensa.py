@@ -34,6 +34,15 @@ from idaapi import *
 # If set to 1, use "sp" register name for "a1"
 SPECIAL_NAMES = 1
 
+HELP = """
+Xtensa CALL0 calling convention (Xtensa ISA RefMan sec. 8.1.2):
+a0    - return address for calls
+a1    - stack pointer
+a2-a7 - function arguments (up to 6, rest on stack)
+a2-a5 - function return value (up to 4 words, usually just a2)
+a12-a15 callee-saved registers (also a0-a1, the rest are caller-saved)
+a15   - frame pointer (optional)
+"""
 
 class Operand:
 	REG	= 0
@@ -187,6 +196,7 @@ class XtensaProcessor(processor_t):
 	plnames = ["Tensilica Xtensa"]
 	segreg_size = 0
 	tbyte_size = 0
+	help_text = HELP
 
 	instruc_start = 0
 
