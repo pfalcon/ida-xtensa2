@@ -342,6 +342,7 @@ class XtensaProcessor(processor_t):
 		("wsr",    0x130000, 0xff000f, Instr.fmt_RSR ),
 		("xor",    0x300000, 0xff000f, Instr.fmt_RRR ),
 		("xsr",    0x610000, 0xff000f, Instr.fmt_RSR ),
+		("movi*",   0x000001, 0x000000, Instr.fmt_NONE ),
 
 		("add.n",   0x000a, 0x000f, Instr.fmt_RRRN ),
 		("addi.n",  0x000b, 0x000f, Instr.fmt_RRRN_addi ),
@@ -435,6 +436,15 @@ class XtensaProcessor(processor_t):
 			o.type = o_void
 		instr.parseOperands(operands, op, self.cmd)
 
+		if instr.name == "l32r":
+			self.cmd.itype = self.instrs_ids["movi*"]
+			ea = self.cmd[1].addr
+			val = (get_full_byte(ea + 3) << 24) | (get_full_byte(ea + 2) << 16) | (get_full_byte(ea + 1) << 8) | get_full_byte(ea)
+			# TODO: query type of ea (o_imm/o_mem), and use the same
+			self.cmd[2].type = o_imm
+			self.cmd[2].value = val
+			self.cmd[1].flags &= ~OF_SHOW
+
 		return self.cmd.size
 
 	def emu(self):
@@ -495,10 +505,15 @@ class XtensaProcessor(processor_t):
 			if self.cmd[i].type == o_void:
 				break
 
+			if self.cmd[i].flags & OF_SHOW == 0:
+				continue
 			if i > 0:
 				out_symbol(',')
 			OutChar(' ')
 			out_one_operand(i)
+
+		if instr.name == "movi*":
+			OutLine(" ; via 0x%x" % self.cmd[1].addr)
 
 		term_output_buffer()
 		cvar.gl_comm = 1
