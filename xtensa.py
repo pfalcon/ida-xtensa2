@@ -29,6 +29,7 @@
 #  note: movi.n and addi with values higher than 127 looks bit wired in compare to
 #        xt-objdump, better would be something like 'ret.value = 0x80 - ret.value'
 
+import string
 from idaapi import *
 
 # If set to 1, use "sp" register name for "a1"
@@ -509,9 +510,12 @@ class XtensaProcessor(processor_t):
 			return False
 		return True
 
-	def out(self):
+	def out_asm(self):
 		buf = init_output_buffer(1024)
-		OutMnem(15)
+		self.out_asm_cont(buf)
+
+	def out_asm_cont(self, buf):
+		OutMnem()
 
 		instr = self.instrs_list[self.cmd.itype]
 
@@ -532,6 +536,207 @@ class XtensaProcessor(processor_t):
 		term_output_buffer()
 		cvar.gl_comm = 1
 		MakeLine(buf)
+
+	def pseudoc_dest(self):
+		out_one_operand(0)
+		OutLine(" = ")
+
+	def pseudoc_goto(self, addr_op):
+		OutLine("goto ")
+		out_one_operand(addr_op)
+
+	def pseudoc_call(self, addr_op):
+		OutLine("call ")
+		out_one_operand(addr_op)
+
+	def pseudoc_memref(self, type):
+		OutLine("*(%s*)" % type)
+		op = self.cmd[1]
+		assert op.type == o_displ
+		if op.addr == 0:
+			out_register(self.regNames[op.phrase])
+		else:
+			OutLine("(")
+			out_register(self.regNames[op.phrase])
+			OutLine(" + ")
+			OutValue(op, OOF_ADDR)
+			OutLine(")")
+
+	def out_pseudoc(self):
+		buf = init_output_buffer(1024)
+		instr = self.instrs_list[self.cmd.itype]
+		mnem = instr.name.replace(".n", "")
+		op_xlat = {
+			"add": "+", "addi": "+", "addmi": "+", "sub": "-",
+			"and": "&", "or": "|", "xor": "^",
+			"slli": "<<", "srli": ">>"
+		}
+		if mnem.startswith("mov"):
+			self.pseudoc_dest()
+			if mnem == "movi*":
+				out_one_operand(2)
+			else:
+				out_one_operand(1)
+		elif mnem == "j":
+			self.pseudoc_goto(0)
+		elif mnem.startswith("call"):
+			self.pseudoc_call(0)
+		elif mnem == "extui":
+			self.pseudoc_dest()
+			OutLine("bitfield(")
+			out_one_operand(1)
+			OutLine(", /*lsb*/")
+			out_one_operand(2)
+			OutLine(", /*sz*/")
+			out_one_operand(3)
+			OutLine(")")
+		elif mnem[0] in ("s", "l") and mnem[1] in string.digits:
+			assert mnem[-1] == "i"
+			mnem = mnem[:-1]
+			if mnem[-1] == "s":
+				type = "i"
+			else:
+				type = "u"
+			if mnem[-1] not in string.digits:
+				mnem = mnem[:-1]
+			type += mnem[1:]
+			if mnem[0] == "s":
+				self.pseudoc_memref(type)
+			else:
+				out_one_operand(0)
+			OutLine(" = ")
+			if mnem[0] == "s":
+				out_one_operand(0)
+			else:
+				self.pseudoc_memref(type)
+		elif mnem == "nsau":
+			self.pseudoc_dest()
+			OutLine("count_leading_zeroes(")
+			out_one_operand(1)
+			OutLine(")")
+		elif mnem == "ssr":
+			OutLine("SAR = ")
+			out_one_operand(0)
+			OutLine(" & 0x1f")
+		elif mnem == "ssl":
+			OutLine("SAR = 32 - (")
+			out_one_operand(0)
+			OutLine(" & 0x1f)")
+		elif mnem == "srai":
+			self.pseudoc_dest()
+			OutLine("(i32)")
+			out_one_operand(1)
+			OutLine(" >> ")
+			out_one_operand(2)
+		elif mnem in op_xlat:
+			out_one_operand(0)
+			ch_sign = False
+
+			# If we add negative immediate value, sub instead
+			if mnem.startswith("add") and self.cmd[2].type == o_imm and self.cmd[2].value < 0:
+				mnem = "sub"
+				self.cmd[2].value = -self.cmd[2].value
+				ch_sign = True
+
+			if mnem == "or" and self.cmd[1].type == self.cmd[2].type and self.cmd[1].reg == self.cmd[2].reg:
+				# "mov" alias
+				OutLine(" = ")
+				out_one_operand(1)
+			elif self.cmd[0].reg == self.cmd[1].reg:
+				OutLine(" %s= " % op_xlat[mnem])
+				out_one_operand(2)
+			else:
+				OutLine(" = ")
+				out_one_operand(1)
+				OutLine(" %s " % op_xlat[mnem])
+				out_one_operand(2)
+			if ch_sign:
+				self.cmd[2].value = -self.cmd[2].value
+		elif mnem == "mull":
+			self.pseudoc_dest()
+			OutLine("(u32)(")
+			out_one_operand(1)
+			OutLine(" * ")
+			out_one_operand(2)
+			OutLine(")")
+		elif mnem == "ssa8l":
+			OutLine("SAR = (")
+			out_one_operand(0)
+			OutLine(" & 3) * 8")
+		elif mnem == "break":
+			# To not be picked up as "b"ranch
+			return self.out_asm()
+		elif mnem.startswith("b"):
+			cond = mnem[1:]
+			OutLine("if (")
+			if cond[-1] == "z":
+				# 2-operand
+				if cond == "eqz":
+					OutLine("!")
+					out_one_operand(0)
+				elif cond == "nez":
+					out_one_operand(0)
+				elif cond == "ltz":
+					OutLine("(i32)")
+					out_one_operand(0)
+					OutLine(" < 0")
+				elif cond == "gez":
+					OutLine("(i32)")
+					out_one_operand(0)
+					OutLine(" >= 0")
+				OutLine(") ")
+				self.pseudoc_goto(1)
+			else:
+				# 3-operand
+				cond_xlat = {"eq": "==", "ne": "!=", "lt": "<", "ge": ">="}
+				is_imm = False
+				is_signed = True
+				if cond[-1] == "i":
+					is_imm = True
+					cond = cond[:-1]
+				if cond[-1] == "u":
+					is_signed = False
+					cond = cond[:-1]
+				if cond in ("eq", "ne"):
+					is_signed = False
+
+				if cond == "bc":
+					OutLine("!(")
+					out_one_operand(0)
+					OutLine(" & BIT(")
+					out_one_operand(1)
+					OutLine("))")
+				elif cond == "bs":
+					out_one_operand(0)
+					OutLine(" & BIT(")
+					out_one_operand(1)
+					OutLine(")")
+				else:
+					if (cond not in cond_xlat):
+							return self.out_asm()
+
+					if is_signed:
+						OutLine("(i32)")
+					out_one_operand(0)
+					OutLine(" %s " % cond_xlat[cond])
+					if is_signed:
+						OutLine("(i32)")
+					out_one_operand(1)
+				OutLine(") ")
+				self.pseudoc_goto(2)
+#				return self.out_asm()
+		else:
+			return self.out_asm()
+
+		OutLine(" ; ")
+		return self.out_asm_cont(buf)
+		term_output_buffer()
+		cvar.gl_comm = 1
+		MakeLine(buf)
+
+
+#	out = out_pseudoc
+	out = out_asm
 
 
 def PROCESSOR_ENTRY():
