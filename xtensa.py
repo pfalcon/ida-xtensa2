@@ -31,6 +31,10 @@
 
 from idaapi import *
 
+# If set to 1, use "sp" register name for "a1"
+SPECIAL_NAMES = 1
+
+
 class Operand:
 	REG	= 0
 	IMM	= 1
@@ -387,6 +391,8 @@ class XtensaProcessor(processor_t):
 
 	def _init_registers(self):
 		self.regNames = ["a%d" % d for d in range(16)]
+		if SPECIAL_NAMES > 0:
+			self.regNames[1] = "sp"
 		self.regNames += ["pc", "sar", "CS", "DS"]
 		self.reg_ids = {}
 		for i, reg in enumerate(self.regNames):
