@@ -92,7 +92,11 @@ class Operand:
 			ret.addr = val
 		elif self.type in (Operand.RELA, Operand.RELAL):
 			ret.type = o_near
-			ret.addr = val + cmd.ea + 4 if self.type == Operand.RELA else ((cmd.ea&0xfffffffc)+4+(val<<2))
+			if val == 0:
+			    # Not relocated addr in .o
+			    ret.addr = cmd.ea
+			else:
+			    ret.addr = val + cmd.ea + 4 if self.type == Operand.RELA else ((cmd.ea&0xfffffffc)+4+(val<<2))
 		elif self.type == Operand.RELU:
 			ret.type = o_near
 			ret.addr = val + cmd.ea + 4
