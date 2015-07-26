@@ -487,7 +487,7 @@ class XtensaProcessor(processor_t):
 	
 	def outop(self, op):
 		if op.type == o_reg:
-			out_register(self.regNames[op.reg])
+			out_register(self.regPrefix + self.regNames[op.reg])
 		elif op.type == o_imm:
 			instr = self.instrs_list[self.cmd.itype]
 			if instr.name in ("extui", "bbci", "bbsi", "slli", "srli", "srai", "ssai"):
@@ -735,7 +735,9 @@ class XtensaProcessor(processor_t):
 		MakeLine(buf)
 
 
+#	regPrefix = "%"
 #	out = out_pseudoc
+	regPrefix = ""
 	out = out_asm
 
 
