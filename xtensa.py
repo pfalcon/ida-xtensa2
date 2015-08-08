@@ -581,6 +581,8 @@ class XtensaProcessor(processor_t):
 			self.pseudoc_goto(0)
 		elif mnem.startswith("call"):
 			self.pseudoc_call(0)
+		elif mnem.startswith("ret"):
+			OutLine("return")
 		elif mnem == "extui":
 			self.pseudoc_dest()
 			OutLine("bitfield(")
