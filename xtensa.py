@@ -503,7 +503,7 @@ class XtensaProcessor(processor_t):
 				out_tagoff(COLOR_ERROR)
 				QueueMark(Q_noName, self.cmd.ea)
 		elif op.type == o_displ:
-			out_register(self.regNames[op.phrase])
+			out_register(self.regPrefix + self.regNames[op.phrase])
 			OutLine(", ")
 			OutValue(op, OOF_ADDR)
 		else:
@@ -554,10 +554,10 @@ class XtensaProcessor(processor_t):
 		op = self.cmd[1]
 		assert op.type == o_displ
 		if op.addr == 0:
-			out_register(self.regNames[op.phrase])
+			out_register(self.regPrefix + self.regNames[op.phrase])
 		else:
 			OutLine("(")
-			out_register(self.regNames[op.phrase])
+			out_register(self.regPrefix + self.regNames[op.phrase])
 			OutLine(" + ")
 			OutValue(op, OOF_ADDR)
 			OutLine(")")
@@ -660,7 +660,7 @@ class XtensaProcessor(processor_t):
 			out_one_operand(2)
 			OutLine(")")
 		elif mnem == "ssa8l":
-			OutLine("SAR = (")
+			OutLine(self.regPrefix + "SAR = (")
 			out_one_operand(0)
 			OutLine(" & 3) * 8")
 		elif mnem == "break":
