@@ -735,7 +735,7 @@ class XtensaProcessor(processor_t):
 		MakeLine(buf)
 
 
-#	regPrefix = "%"
+#	regPrefix = "$"
 #	out = out_pseudoc
 	regPrefix = ""
 	out = out_asm
