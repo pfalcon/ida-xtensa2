@@ -665,6 +665,39 @@ class XtensaProcessor(processor_t):
 			OutLine(self.regPrefix + "SAR = (")
 			out_one_operand(0)
 			OutLine(" & 3) * 8")
+
+		elif mnem.startswith("rsr"):
+			self.pseudoc_dest()
+			OutLine(mnem)
+			OutLine("()")
+		elif mnem.startswith("wsr"):
+			OutLine(mnem)
+			OutLine("(")
+			out_one_operand(0)
+			OutLine(")")
+		elif mnem == "rsil":
+			self.pseudoc_dest()
+			OutLine(mnem)
+			OutLine("(")
+			out_one_operand(1)
+			OutLine(")")
+		elif mnem in ("wdtlb", "witlb"):
+			OutLine(mnem)
+			OutLine("(")
+			out_one_operand(0)
+			OutLine(", ")
+			out_one_operand(1)
+			OutLine(")")
+		# Argument-less special functions
+		elif mnem in ("memw",):
+			OutLine(mnem)
+			OutLine("()")
+		elif mnem.startswith("nop"):
+			OutLine(mnem)
+			OutLine("()")
+		elif mnem.endswith("sync"):
+			OutLine(mnem)
+			OutLine("()")
 		elif mnem == "break":
 			# To not be picked up as "b"ranch
 			return self.out_asm()
