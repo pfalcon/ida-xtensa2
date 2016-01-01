@@ -663,6 +663,25 @@ class XtensaProcessor(processor_t):
 				out_one_operand(2)
 			if ch_sign:
 				self.cmd[2].value = -self.cmd[2].value
+		elif mnem in ("addx2", "addx4", "addx8"):
+			out_one_operand(0)
+			mult = int(mnem[-1])
+			if self.cmd[0].reg == self.cmd[2].reg:
+				if self.cmd[0].reg == self.cmd[1].reg:
+					OutLine(" *= %d" % (mult + 1))
+				else:
+					OutLine(" += ")
+					out_one_operand(1)
+					OutLine(" * %d" % mult)
+			else:
+				OutLine(" = ")
+				if self.cmd[1].reg == self.cmd[2].reg:
+					out_one_operand(1)
+					OutLine(" * %d" % (mult + 1))
+				else:
+					out_one_operand(1)
+					OutLine(" * %d + " % mult)
+					out_one_operand(2)
 		elif mnem == "mull":
 			self.pseudoc_dest()
 			OutLine("(u32)(")
