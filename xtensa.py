@@ -620,6 +620,10 @@ class XtensaProcessor(processor_t):
 				out_one_operand(0)
 			else:
 				self.pseudoc_memref(type)
+		elif mnem == "neg":
+			self.pseudoc_dest()
+			OutLine("-")
+			out_one_operand(1)
 		elif mnem == "nsau":
 			self.pseudoc_dest()
 			OutLine("count_leading_zeroes(")
