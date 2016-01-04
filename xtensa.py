@@ -565,7 +565,7 @@ class XtensaProcessor(processor_t):
 			OutLine("(")
 			out_register(self.regPrefix + self.regNames[op.phrase])
 			OutLine(" + ")
-			OutValue(op, OOF_ADDR)
+			OutLong(op.addr, 16)
 			OutLine(")")
 
 	def out_pseudoc(self):
