@@ -457,7 +457,10 @@ class XtensaProcessor(processor_t):
 		if instr.name == "l32r":
 			self.cmd.itype = self.instrs_ids["movi*"]
 			ea = self.cmd[1].addr
-			val = (get_full_byte(ea + 3) << 24) | (get_full_byte(ea + 2) << 16) | (get_full_byte(ea + 1) << 8) | get_full_byte(ea)
+			#val = (get_full_byte(ea + 3) << 24) | (get_full_byte(ea + 2) << 16) | (get_full_byte(ea + 1) << 8) | get_full_byte(ea)
+			# get_full_val() is ScratchABit extension to support
+			# disassembling .o files.
+			val = get_full_val(ea, 4)
 			# TODO: query type of ea (o_imm/o_mem), and use the same
 			self.cmd[2].type = o_imm
 			self.cmd[2].value = val
