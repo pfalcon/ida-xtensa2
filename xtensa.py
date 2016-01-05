@@ -461,10 +461,13 @@ class XtensaProcessor(processor_t):
 			# get_full_val() is ScratchABit extension to support
 			# disassembling .o files.
 			val = get_full_val(ea, 4)
-			# TODO: query type of ea (o_imm/o_mem), and use the same
 			self.cmd[2].type = o_imm
 			self.cmd[2].value = val
 			self.cmd[1].flags &= ~OF_SHOW
+			# If data referenced by l32r was an offset,
+			# make movi*'s argument offset too
+			if is_offset(ea, 0):
+				op_offset(self.cmd.ea, 2, REF_OFF32, ref_addr=val)
 
 		return self.cmd.size
 
