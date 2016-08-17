@@ -672,6 +672,9 @@ class XtensaProcessor(processor_t):
 			elif self.cmd[0].reg == self.cmd[1].reg:
 				OutLine(" %s= " % op_xlat[mnem])
 				out_one_operand(2)
+			elif mnem == "add" and self.cmd[0].reg == self.cmd[2].reg:
+				OutLine(" %s= " % op_xlat[mnem])
+				out_one_operand(1)
 			else:
 				OutLine(" = ")
 				out_one_operand(1)
