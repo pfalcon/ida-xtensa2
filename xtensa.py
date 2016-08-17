@@ -583,10 +583,12 @@ class XtensaProcessor(processor_t):
 		if mnem.startswith("mov"):
 			if mnem in ("moveqz", "movnez"):
 				OutLine("if (")
-				if mnem == "moveqz":
-					OutLine("!")
 				out_one_operand(2)
-				OutLine(") ")
+				if mnem == "moveqz":
+					OutLine(" == ")
+				else:
+					OutLine(" != ")
+				OutLine("0) ")
 			self.pseudoc_dest()
 			if mnem == "movi*":
 				out_one_operand(2)
