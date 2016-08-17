@@ -727,7 +727,8 @@ class XtensaProcessor(processor_t):
 			self.pseudoc_dest()
 			OutLine(mnem)
 			OutLine("()")
-		elif mnem.startswith("wsr"):
+		elif mnem.startswith("wsr") or mnem == "waiti":
+			# Special func with no dest and 1 arg
 			OutLine(mnem)
 			OutLine("(")
 			out_one_operand(0)
@@ -738,7 +739,7 @@ class XtensaProcessor(processor_t):
 			OutLine("(")
 			out_one_operand(1)
 			OutLine(")")
-		elif mnem in ("wdtlb", "witlb"):
+		elif mnem in ("wdtlb", "witlb", "break"):
 			OutLine(mnem)
 			OutLine("(")
 			out_one_operand(0)
@@ -755,9 +756,6 @@ class XtensaProcessor(processor_t):
 		elif mnem.endswith("sync"):
 			OutLine(mnem)
 			OutLine("()")
-		elif mnem == "break":
-			# To not be picked up as "b"ranch
-			return self.out_asm()
 		elif mnem.startswith("b"):
 			cond = mnem[1:]
 			OutLine("if (")
