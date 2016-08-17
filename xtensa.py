@@ -751,10 +751,11 @@ class XtensaProcessor(processor_t):
 			if cond[-1] == "z":
 				# 2-operand
 				if cond == "eqz":
-					OutLine("!")
 					out_one_operand(0)
+					OutLine(" == 0")
 				elif cond == "nez":
 					out_one_operand(0)
+					OutLine(" != 0")
 				elif cond == "ltz":
 					OutLine("(i32)")
 					out_one_operand(0)
