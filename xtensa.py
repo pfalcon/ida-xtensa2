@@ -637,6 +637,9 @@ class XtensaProcessor(processor_t):
 			OutLine("count_leading_zeroes(")
 			out_one_operand(1)
 			OutLine(")")
+		elif mnem == "ssai":
+			OutLine("SAR = ")
+			out_one_operand(0)
 		elif mnem == "ssr":
 			OutLine("SAR = ")
 			out_one_operand(0)
@@ -655,6 +658,13 @@ class XtensaProcessor(processor_t):
 			out_one_operand(1)
 			OutLine(" >> ")
 			out_one_operand(2)
+		elif mnem == "src":
+			self.pseudoc_dest()
+			OutLine("UINT64(")
+			out_one_operand(1)
+			OutLine(", ")
+			out_one_operand(2)
+			OutLine(") >> SAR")
 		elif mnem in op_xlat:
 			out_one_operand(0)
 			ch_sign = False
