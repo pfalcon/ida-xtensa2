@@ -132,6 +132,28 @@ def addin(val):
 def shimm(val):
 	return 32-val
 
+def specreg2sym(val):
+	return {
+	3: "SAR",
+	5: "LITBASE",
+	104: "DDR",
+	177: "EPC1",
+	178: "EPC2",
+	179: "EPC3",
+	192: "DEPC",
+	209: "EXCSAVE1",
+	226: "INTERRUPT",
+	227: "INTCLEAR",
+	228: "INTENABLE",
+	230: "PS",
+	231: "VECBASE",
+	232: "EXCCAUSE",
+	234: "CCOUNT",
+	235: "PRID",
+	238: "EXCVADDR",
+	}.get(val, val)
+
+
 class Instr(object):
 
 	fmt_NONE	= (3, ())
@@ -165,7 +187,7 @@ class Instr(object):
 	fmt_CALL	= (3, (Operand(Operand.RELA, 18, 6),))
 	fmt_CALL_sh	= (3, (Operand(Operand.RELAL, 18, 6),))
 	fmt_CALLX	= (3, (Operand(Operand.REG, 4, 8),))
-	fmt_RSR		= (3, (Operand(Operand.IMM, 8, 8), Operand(Operand.REG, 4, 4)))
+	fmt_RSR		= (3, (Operand(Operand.IMM, 8, 8, xlate=specreg2sym), Operand(Operand.REG, 4, 4)))
 	fmt_RSR_spec	= (3, (Operand(Operand.REG, 4, 4),))
 	fmt_RRRN	= (2, (Operand(Operand.REG, 4, 12), Operand(Operand.REG, 4, 8), Operand(Operand.REG, 4, 4)))
 	fmt_RRRN_addi	= (2, (Operand(Operand.REG, 4, 12), Operand(Operand.REG, 4, 8), Operand(Operand.IMM, 4, 4, xlate=addin)))
@@ -306,25 +328,6 @@ class XtensaProcessor(processor_t):
 		("rfe",    0x003000, 0xffffff, Instr.fmt_NONE, CF_STOP ),
 		("rfi",    0x003010, 0xfff0ff, Instr.fmt_RRR_1imm, CF_STOP ),
 		("rsil",   0x006000, 0xfff00f, Instr.fmt_RRR_immr ),
-		("rsr.prid",      0x03eb00, 0xffff0f, Instr.fmt_RSR_spec ),
-		("rsr.epc1",      0x03b100, 0xffff0f, Instr.fmt_RSR_spec ),
-		("rsr.epc2",      0x03b200, 0xffff0f, Instr.fmt_RSR_spec ),
-		("rsr.epc3",      0x03b300, 0xffff0f, Instr.fmt_RSR_spec ),
-		("rsr.epc4",      0x03b400, 0xffff0f, Instr.fmt_RSR_spec ),
-		("rsr.epc5",      0x03b500, 0xffff0f, Instr.fmt_RSR_spec ),
-		("rsr.epc6",      0x03b600, 0xffff0f, Instr.fmt_RSR_spec ),
-		("rsr.epc7",      0x03b700, 0xffff0f, Instr.fmt_RSR_spec ),
-		("rsr.ps",        0x03e600, 0xffff0f, Instr.fmt_RSR_spec ),
-		("rsr.exccause",  0x03e800, 0xffff0f, Instr.fmt_RSR_spec ),
-		("rsr.ccount",    0x03e400, 0xffff0f, Instr.fmt_RSR_spec ),
-		("rsr.excvaddr",  0x03ee00, 0xffff0f, Instr.fmt_RSR_spec ),
-		("rsr.depc",      0x03c000, 0xffff0f, Instr.fmt_RSR_spec ),
-		("rsr.prid",      0x03eb00, 0xffff0f, Instr.fmt_RSR_spec ),
-		("rsr.ccompare0", 0x03f000, 0xffff0f, Instr.fmt_RSR_spec ),
-		("rsr.interrupt", 0x03e200, 0xffff0f, Instr.fmt_RSR_spec ),
-		("rsr.intenable", 0x03e400, 0xffff0f, Instr.fmt_RSR_spec ),
-		("rsr.sar",       0x030300, 0xffff0f, Instr.fmt_RSR_spec ),
-		("rsr.ddr",       0x036800, 0xffff0f, Instr.fmt_RSR_spec ),
 		("rsr",    0x030000, 0xff000f, Instr.fmt_RSR ),
 		("rsync",  0x002010, 0xffffff, Instr.fmt_NONE ),
 		("s8i",    0x004002, 0x00f00f, Instr.fmt_RRI8_disp ),
@@ -349,14 +352,6 @@ class XtensaProcessor(processor_t):
 		("waiti",  0x007000, 0xfff0ff, Instr.fmt_RRR_1imm ),
 		("wdtlb",  0x50e000, 0xfff00f, Instr.fmt_RRR_2r ),
 		("witlb",  0x506000, 0xfff00f, Instr.fmt_RRR_2r ),
-		("wsr.intenable", 0x13e400, 0xffff0f, Instr.fmt_RSR_spec ),
-		("wsr.litbase",   0x130500, 0xffff0f, Instr.fmt_RSR_spec ),
-		("wsr.vecbase",   0x13e700, 0xffff0f, Instr.fmt_RSR_spec ),
-		("wsr.ps",        0x13e600, 0xffff0f, Instr.fmt_RSR_spec ),
-		("wsr.epc1",      0x13b100, 0xffff0f, Instr.fmt_RSR_spec ),
-		("wsr.ccompare0", 0x13f000, 0xffff0f, Instr.fmt_RSR_spec ),
-		("wsr.intclear",  0x13e300, 0xffff0f, Instr.fmt_RSR_spec ),
-		("wsr.sar",       0x130300, 0xffff0f, Instr.fmt_RSR_spec ),
 		("wsr",    0x130000, 0xff000f, Instr.fmt_RSR ),
 		("xor",    0x300000, 0xff000f, Instr.fmt_RRR ),
 		("xsr",    0x610000, 0xff000f, Instr.fmt_RSR ),
@@ -546,8 +541,8 @@ class XtensaProcessor(processor_t):
 		cvar.gl_comm = 1
 		MakeLine(buf)
 
-	def pseudoc_dest(self):
-		out_one_operand(0)
+	def pseudoc_dest(self, oper=0):
+		out_one_operand(oper)
 		OutLine(" = ")
 
 	def pseudoc_goto(self, addr_op):
@@ -775,10 +770,19 @@ class XtensaProcessor(processor_t):
 			OutLine(" & 3) * 8")
 
 		elif mnem.startswith("rsr"):
-			self.pseudoc_dest()
+			self.pseudoc_dest(1)
 			OutLine(mnem)
-			OutLine("()")
-		elif mnem.startswith("wsr") or mnem == "waiti":
+			OutLine("(")
+			out_one_operand(0)
+			OutLine(")")
+		elif mnem.startswith("wsr") or mnem.startswith("xsr"):
+			OutLine(mnem)
+			OutLine("(")
+			out_one_operand(0)
+			OutLine(", ")
+			out_one_operand(1)
+			OutLine(")")
+		elif mnem == "waiti":
 			# Special func with no dest and 1 arg
 			OutLine(mnem)
 			OutLine("(")
