@@ -651,7 +651,20 @@ class XtensaProcessor(processor_t):
 		elif mnem == "sll":
 			self.pseudoc_dest()
 			out_one_operand(1)
-			OutLine(" << SAR")
+			OutLine(" << (32 - $SAR)")
+		elif mnem == "srl":
+			if self.cmd[0].reg == self.cmd[1].reg:
+				out_one_operand(0)
+				OutLine(" >>= $SAR")
+			else:
+				self.pseudoc_dest()
+				out_one_operand(1)
+				OutLine(" >> $SAR")
+		elif mnem == "sra":
+			self.pseudoc_dest()
+			OutLine("(i32)")
+			out_one_operand(1)
+			OutLine(" >> $SAR")
 		elif mnem == "srai":
 			self.pseudoc_dest()
 			OutLine("(i32)")
