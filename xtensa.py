@@ -718,6 +718,20 @@ class XtensaProcessor(processor_t):
 			OutLine(" * ")
 			out_one_operand(2)
 			OutLine(")")
+		elif mnem == "mul16u":
+			self.pseudoc_dest()
+			OutLine("(u16)")
+			out_one_operand(1)
+			OutLine(" * ")
+			OutLine("(u16)")
+			out_one_operand(2)
+		elif mnem == "mul16s":
+			self.pseudoc_dest()
+			OutLine("(i16)")
+			out_one_operand(1)
+			OutLine(" * ")
+			OutLine("(i16)")
+			out_one_operand(2)
 		elif mnem == "ssa8l":
 			OutLine(self.regPrefix + "SAR = (")
 			out_one_operand(0)
