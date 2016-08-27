@@ -637,6 +637,11 @@ class XtensaProcessor(processor_t):
 			OutLine("count_leading_zeroes(")
 			out_one_operand(1)
 			OutLine(")")
+		elif mnem == "abs":
+			self.pseudoc_dest()
+			OutLine("abs(")
+			out_one_operand(1)
+			OutLine(")")
 		elif mnem == "ssai":
 			OutLine("SAR = ")
 			out_one_operand(0)
