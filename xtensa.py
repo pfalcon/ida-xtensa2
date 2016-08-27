@@ -802,9 +802,34 @@ class XtensaProcessor(processor_t):
 					OutLine(" & BIT(")
 					out_one_operand(1)
 					OutLine(")")
+				elif cond == "any":
+					out_one_operand(0)
+					OutLine(" & ")
+					out_one_operand(1)
+				elif cond == "none":
+					OutLine("(")
+					out_one_operand(0)
+					OutLine(" & ")
+					out_one_operand(1)
+					OutLine(") == 0")
+				elif cond == "all":
+					OutLine("(")
+					out_one_operand(0)
+					OutLine(" & ")
+					out_one_operand(1)
+					OutLine(") == ")
+					out_one_operand(1)
+				elif cond == "nall":
+					OutLine("(")
+					out_one_operand(0)
+					OutLine(" & ")
+					out_one_operand(1)
+					OutLine(") != ")
+					out_one_operand(1)
 				else:
 					if (cond not in cond_xlat):
-							return self.out_asm()
+						OutLine("Unconverted: ")
+						return self.out_asm_cont(buf)
 
 					if is_signed:
 						OutLine("(i32)")
