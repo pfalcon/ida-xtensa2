@@ -732,6 +732,10 @@ class XtensaProcessor(processor_t):
 			OutLine(" * ")
 			OutLine("(i16)")
 			out_one_operand(2)
+		elif mnem == "ssa8b":
+			OutLine(self.regPrefix + "SAR = 32 - (")
+			out_one_operand(0)
+			OutLine(" & 3) * 8")
 		elif mnem == "ssa8l":
 			OutLine(self.regPrefix + "SAR = (")
 			out_one_operand(0)
