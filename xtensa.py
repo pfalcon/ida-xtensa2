@@ -461,12 +461,22 @@ class XtensaProcessor(processor_t):
 			self.cmd[1].flags &= ~OF_SHOW
 			# If data referenced by l32r was an offset,
 			# make movi*'s argument offset too
-			if is_offset(ea, 0):
-				op_offset(self.cmd.ea, 2, REF_OFF32, ref_addr=val)
+# Don't do this in ana(), as it may lead to disassembly listing changed just by
+# browsing it (because ana() is called to render an instruction). Instead, do this
+# below in emu(), which is called once during initial analysis (that means that
+# data type won't be automagically propagated to where it's referenced by l32r,
+# but listing stability is more important, and doing the above is something for
+# plugin anyway).
+#			if is_offset(ea, 0):
+#				op_offset(self.cmd.ea, 2, REF_OFF32, ref_addr=val)
 
 		return self.cmd.size
 
 	def emu(self):
+		if self.cmd[1].type == o_mem and self.cmd[2].type == o_imm:
+			# This can be only movi*
+			if is_offset(self.cmd[1].addr, 0):
+				op_offset(self.cmd.ea, 2, REF_OFF32, ref_addr=self.cmd[2].value)
 		for i in range(6):
 			op = self.cmd[i]
 			if op.type == o_void:
