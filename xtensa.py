@@ -739,6 +739,12 @@ class XtensaProcessor(processor_t):
 			OutLine("(")
 			out_one_operand(1)
 			OutLine(")")
+		elif mnem == "rfi":
+			OutLine("return /*intlevel=")
+			out_one_operand(0)
+			OutLine("*/")
+		elif mnem == "rfe":
+			OutLine("return /*exc*/")
 		elif mnem in ("wdtlb", "witlb", "break"):
 			OutLine(mnem)
 			OutLine("(")
