@@ -594,7 +594,7 @@ class XtensaProcessor(processor_t):
 				out_one_operand(2)
 			else:
 				out_one_operand(1)
-		elif mnem == "j":
+		elif mnem in ("j", "jx"):
 			self.pseudoc_goto(0)
 		elif mnem.startswith("call"):
 			self.pseudoc_call(0)
