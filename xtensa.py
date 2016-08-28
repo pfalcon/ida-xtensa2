@@ -872,11 +872,11 @@ class XtensaProcessor(processor_t):
 					is_signed = False
 
 				if cond == "bc":
-					OutLine("")
+					OutLine("(")
 					out_one_operand(0)
 					OutLine(" & BIT(")
 					out_one_operand(1)
-					OutLine(") == 0")
+					OutLine(")) == 0")
 				elif cond == "bs":
 					out_one_operand(0)
 					OutLine(" & BIT(")
