@@ -648,14 +648,14 @@ class XtensaProcessor(processor_t):
 			out_one_operand(1)
 			OutLine(")")
 		elif mnem == "ssai":
-			OutLine("SAR = ")
+			OutLine("$SAR = ")
 			out_one_operand(0)
 		elif mnem == "ssr":
-			OutLine("SAR = ")
+			OutLine("$SAR = ")
 			out_one_operand(0)
 			OutLine(" & 0x1f")
 		elif mnem == "ssl":
-			OutLine("SAR = 32 - (")
+			OutLine("$SAR = 32 - (")
 			out_one_operand(0)
 			OutLine(" & 0x1f)")
 		elif mnem == "sll":
@@ -687,7 +687,7 @@ class XtensaProcessor(processor_t):
 			out_one_operand(1)
 			OutLine(", ")
 			out_one_operand(2)
-			OutLine(") >> SAR")
+			OutLine(") >> $SAR")
 		elif mnem in op_xlat:
 			out_one_operand(0)
 			ch_sign = False
