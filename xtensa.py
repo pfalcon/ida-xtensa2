@@ -659,9 +659,13 @@ class XtensaProcessor(processor_t):
 			out_one_operand(0)
 			OutLine(" & 0x1f)")
 		elif mnem == "sll":
-			self.pseudoc_dest()
-			out_one_operand(1)
-			OutLine(" << (32 - $SAR)")
+			if self.cmd[0].reg == self.cmd[1].reg:
+				out_one_operand(0)
+				OutLine(" <<= 32 - $SAR")
+			else:
+				self.pseudoc_dest()
+				out_one_operand(1)
+				OutLine(" << (32 - $SAR)")
 		elif mnem == "srl":
 			if self.cmd[0].reg == self.cmd[1].reg:
 				out_one_operand(0)
@@ -750,12 +754,17 @@ class XtensaProcessor(processor_t):
 				OutLine(" * %d - " % mult)
 				out_one_operand(2)
 		elif mnem == "mull":
-			self.pseudoc_dest()
-			OutLine("(u32)(")
-			out_one_operand(1)
-			OutLine(" * ")
-			out_one_operand(2)
-			OutLine(")")
+			if self.cmd[0].reg == self.cmd[1].reg:
+				out_one_operand(0)
+				OutLine(" *= ")
+				out_one_operand(2)
+			else:
+				self.pseudoc_dest()
+				#OutLine("(u32)(")
+				out_one_operand(1)
+				OutLine(" * ")
+				out_one_operand(2)
+				#OutLine(")")
 		elif mnem == "mul16u":
 			self.pseudoc_dest()
 			OutLine("(u16)")
