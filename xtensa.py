@@ -223,6 +223,8 @@ class XtensaProcessor(processor_t):
 	segreg_size = 0
 	tbyte_size = 0
 	help_text = HELP
+	regPrefix = ""
+	mnem_type = "asm"
 
 	instruc_start = 0
 
@@ -922,19 +924,33 @@ class XtensaProcessor(processor_t):
 				self.pseudoc_goto(2)
 #				return self.out_asm()
 		else:
-			return self.out_asm()
+			OutLine("Unconverted: ")
+			return self.out_asm_cont(buf)
 
-		OutLine(" ; ")
-		return self.out_asm_cont(buf)
+		if self.mnem_type == "pseudoc+asm":
+			OutLine(" ; ")
+			try:
+			    save = self.cmd.arg_pos
+			except AttributeError:
+			    save = []
+			self.cmd.arg_pos = None
+			self.out_asm_cont(buf)
+			self.cmd.arg_pos = save
+			return
 		term_output_buffer()
 		cvar.gl_comm = 1
 		MakeLine(buf)
 
-
-#	regPrefix = "$"
-#	out = out_pseudoc
-	regPrefix = ""
+	# Default "out" method implementation
 	out = out_asm
+
+	def config(self):
+		if self.mnem_type == "asm":
+			self.regPrefix = ""
+			self.out = self.out_asm
+		else:
+			self.regPrefix = "$"
+			self.out = self.out_pseudoc
 
 
 def PROCESSOR_ENTRY():
