@@ -142,6 +142,8 @@ def specreg2sym(val):
 	179: "EPC3",
 	192: "DEPC",
 	209: "EXCSAVE1",
+	210: "EXCSAVE2",
+	211: "EXCSAVE3",
 	226: "INTERRUPT",
 	227: "INTCLEAR",
 	228: "INTENABLE",
