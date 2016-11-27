@@ -477,6 +477,7 @@ class XtensaProcessor(processor_t):
 		return self.cmd.size
 
 	def emu(self):
+		features = self.cmd.get_canon_feature()
 		if self.cmd[1].type == o_mem and self.cmd[2].type == o_imm:
 			# This can be only movi*
 			if is_offset(self.cmd[1].addr, 0):
@@ -489,18 +490,19 @@ class XtensaProcessor(processor_t):
 				ua_dodata2(0, op.addr, op.dtyp)
 				ua_add_dref(0, op.addr, dr_R)
 			elif op.type == o_near:
-				features = self.cmd.get_canon_feature()
 				if features & CF_CALL:
 					fl = fl_CN
 				else:
 					fl = fl_JN
 				ua_add_cref(0, op.addr, fl)
 
-		feature = self.cmd.get_canon_feature()
-		if feature & CF_JUMP:
+		if features & CF_JUMP:
 			QueueMark(Q_jumps, self.cmd.ea)
-		if not feature & CF_STOP:
-			ua_add_cref(0, self.cmd.ea + self.cmd.size, fl_F)
+		if not (features & CF_STOP):
+			if features & CF_CALL:
+				ua_add_cref(0, self.cmd.ea + self.cmd.size, fl_RET_FROM_CALL)
+			else:
+				ua_add_cref(0, self.cmd.ea + self.cmd.size, fl_F)
 		return True
 	
 	def outop(self, op):
