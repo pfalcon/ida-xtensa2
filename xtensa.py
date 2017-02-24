@@ -884,14 +884,17 @@ class XtensaProcessor(processor_t):
 					out_one_operand(1)
 					OutLine(")) == 0")
 				elif cond == "bs":
+					OutLine("(")
 					out_one_operand(0)
 					OutLine(" & BIT(")
 					out_one_operand(1)
-					OutLine(")")
+					OutLine(")) != 0")
 				elif cond == "any":
+					OutLine("(")
 					out_one_operand(0)
 					OutLine(" & ")
 					out_one_operand(1)
+					OutLine(") != 0")
 				elif cond == "none":
 					OutLine("(")
 					out_one_operand(0)
